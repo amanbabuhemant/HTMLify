@@ -2,6 +2,8 @@ fastapi
 peewee
 pillow
 pydantic
+pyjwt
 python-multipart
 qrcode
 requests
+werkzeug

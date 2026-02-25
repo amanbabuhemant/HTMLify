@@ -1,0 +1,91 @@
+import jwt
+from fastapi import Security, HTTPException
+from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
+from starlette import status
+
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from app.services.user_service import UserService, User
+from app.config import SECRET_KEY
+
+
+oauth2_scheme = OAuth2PasswordBearer(
+    "/v1/auth/token",
+    auto_error=False
+)
+
+api_key_scheme = APIKeyHeader(
+    name="X-API-Key",
+    auto_error=False
+)
+
+
+class AuthService:
+
+    SECRET_KEY = SECRET_KEY
+    ALGORITHM = "HS256"
+
+    @staticmethod
+    def authenticate_user(username: str, password: str) -> Optional[User]:
+        user = UserService.get_user(username)
+        if not user:
+            return None
+        auth = UserService.auth_user(user, password)
+        if auth:
+            return user
+        return None
+
+    @staticmethod
+    def create_access_token(data: dict, expire_delta: timedelta | None = None) -> str:
+        to_encode = data.copy()
+        if expire_delta:
+            expire = datetime.now(timezone.utc) + expire_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, AuthService.SECRET_KEY, algorithm=AuthService.ALGORITHM)
+        return encoded_jwt
+
+    @staticmethod
+    def get_user_by_token(token: str):
+        try:
+            payload = jwt.decode(
+                token,
+                AuthService.SECRET_KEY,
+                algorithms=[AuthService.ALGORITHM],
+            )
+            username = payload.get("sub")
+            if not username:
+                return None
+            return UserService.get_user(username)
+        except:
+            return None
+
+    @staticmethod
+    def get_user_by_api_key(api_key: str):
+        return UserService.get_user_by_api_key(api_key)
+
+    @staticmethod
+    def get_current_user(
+        token: str | None = Security(oauth2_scheme),
+        api_key: str | None = Security(api_key_scheme),
+    ) -> User:
+
+        user = None
+
+        if token:
+            user = AuthService.get_user_by_token(token)
+
+        if not user and api_key:
+            user = AuthService.get_user_by_api_key(api_key)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
+
+        return user
+
+

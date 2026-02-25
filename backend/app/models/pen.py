@@ -1,6 +1,6 @@
 from peewee import Model, SqliteDatabase, IntegerField, CharField, TimestampField
-from pygments import lexers, highlight
-from pygments.formatters import HtmlFormatter
+# from pygments import lexers, highlight
+# from pygments.formatters import HtmlFormatter
 
 from datetime import datetime, UTC
 
@@ -17,11 +17,11 @@ pen_db = SqliteDatabase(
             "synchronous":  2,
             "busy_timeout": 8000,
         })
-html_lexer = lexers.get_lexer_by_name("html")
-css_lexer = lexers.get_lexer_by_name("css")
-js_lexer = lexers.get_lexer_by_name("js")
-html_formatter = HtmlFormatter()
-html_formatter_with_linenos = HtmlFormatter(linenos=True)
+# html_lexer = lexers.get_lexer_by_name("html")
+# css_lexer = lexers.get_lexer_by_name("css")
+# js_lexer = lexers.get_lexer_by_name("js")
+# html_formatter = HtmlFormatter()
+# html_formatter_with_linenos = HtmlFormatter(linenos=True)
 
 
 class Pen(Model, BlobDependent, metaclass=PeeweeABCMeta):

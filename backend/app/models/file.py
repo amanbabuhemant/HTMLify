@@ -1,6 +1,6 @@
 from peewee import Model, SqliteDatabase, AutoField, CharField, IntegerField, BooleanField, TimestampField
-from pygments import lexers, highlight
-from pygments.formatters import HtmlFormatter
+# from pygments import lexers, highlight
+# from pygments.formatters import HtmlFormatter
 
 from typing import List, Union
 from datetime import datetime, UTC
@@ -20,9 +20,9 @@ file_db = SqliteDatabase(
             "synchronous":  2,
             "busy_timeout": 8000,
         })
-text_lexer = lexers.get_lexer_by_name("text")
-html_formatter = HtmlFormatter()
-html_formatter_with_linenos = HtmlFormatter(linenos=True)
+# text_lexer = lexers.get_lexer_by_name("text")
+# html_formatter = HtmlFormatter()
+# html_formatter_with_linenos = HtmlFormatter(linenos=True)
 
 
 class FileMode:
