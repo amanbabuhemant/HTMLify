@@ -1,12 +1,14 @@
 from pydantic import BaseModel, EmailStr
 
+from typing import Optional
+
 
 class UserFullInfo(BaseModel):
     id: int 
     name: str 
     bio: str 
     username: str 
-    email: str 
+    email: EmailStr 
     active: bool 
     verified: bool 
     role: str # this is just "user" for now
@@ -47,3 +49,14 @@ class UserPublicInfo(BaseModel):
 
 class APIKeyResponse(BaseModel):
     api_key: str
+
+class UserUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    password: Optional[str] = None
+
+class UserCreateRequest(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+

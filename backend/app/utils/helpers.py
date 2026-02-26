@@ -78,3 +78,10 @@ def tokenize_string(string: str) -> list[str]:
             continue
         tokens.append(t)
     return tokens
+
+def is_valid_email_address(email_address: str) -> bool:
+    """Validade email address formate"""
+    email_regex = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}"
+    if re.fullmatch(email_regex, email_address):
+        return True
+    return False
