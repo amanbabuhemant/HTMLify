@@ -6,6 +6,7 @@ import { UserFullInfo } from "@/lib/modules/user/user.types";
 
 export const AUTH_ONLY_ROUTES = ["/signin", "/signup"];
 export const PROTECTED_ROUTES = ["/dashboard"];
+export const DASHBOARD_ROUTES = [...AUTH_ONLY_ROUTES, ...PROTECTED_ROUTES];
 
 async function fetchMe(): Promise<{
   user: UserFullInfo | null;

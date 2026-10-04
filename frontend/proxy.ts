@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 
 import {
   AUTH_ONLY_ROUTES,
-  handleAuthOrProtectedRoute,
   PROTECTED_ROUTES,
+  DASHBOARD_ROUTES,
+  handleAuthOrProtectedRoute,
 } from "@/lib/modules/auth/auth.proxy";
 import { serverFile } from "@/lib/modules/file/file.proxy";
 import { serverPenContent } from "@/lib/modules/pen/pen.proxy";
@@ -23,9 +24,20 @@ const matchRoute = (route: string, routes: string[]) =>
 const isTmp = (pathname: string) => matchRoute(pathname, tmpPaths);
 const isShortLink = (pathname: string) => matchRoute(pathname, shortnerPaths);
 const isPen = (pathname: string) => matchRoute(pathname, penPaths);
+const isDashboardRoute = (pathname: string) => matchRoute(pathname, DASHBOARD_ROUTES);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get("host")?.split(":")[0] ?? "";
+  const siteUrl = new URL(env.NEXT_PUBLIC_SITE_URL);
+  const publicHostname = siteUrl.hostname;
+  const dashboardHostname = `${env.NEXT_PUBLIC_SUBDOMAIN}.${publicHostname}`;
+
+  if (hostname === publicHostname && isDashboardRoute(pathname)) {
+    const url = request.nextUrl.clone();
+    url.hostname = dashboardHostname;
+    return NextResponse.redirect(url);
+  }
 
   if (pathname === "/api") {
     return NextResponse.redirect(`${env.NEXT_PUBLIC_BACKEND_API_URL}/docs`);
@@ -50,6 +62,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const totalExcludeRoute = AUTH_ONLY_ROUTES.concat(PROTECTED_ROUTES);
+
   if (totalExcludeRoute.some((path: string) => pathname.startsWith(path))) {
     return await handleAuthOrProtectedRoute(request, pathname);
   }
@@ -67,7 +80,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|\.well-known|.*\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|\\.well-known|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2)$).*)",
     "/((?!about).*)",
   ],
 };
