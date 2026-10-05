@@ -33,6 +33,19 @@ export async function proxy(request: NextRequest) {
   const publicHostname = siteUrl.hostname;
   const dashboardHostname = `${env.NEXT_PUBLIC_SUBDOMAIN}.${publicHostname}`;
 
+  // Dashboard subdomain -> main domain, for non-dashboard routes
+  if (
+    hostname === dashboardHostname &&
+    !isDashboardRoute(pathname) &&
+    !pathname.startsWith("/_next") &&
+    !pathname.startsWith("/api")
+  ) {
+    const url = request.nextUrl.clone();
+    url.hostname = publicHostname;
+    return NextResponse.redirect(url);
+  }
+
+  // Main domain -> dashboard subdomain, for dashboard routes
   if (hostname === publicHostname && isDashboardRoute(pathname)) {
     const url = request.nextUrl.clone();
     url.hostname = dashboardHostname;
