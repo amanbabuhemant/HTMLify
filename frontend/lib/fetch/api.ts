@@ -72,6 +72,12 @@ export async function APICall(
       const headers: Record<string, string> = {
         ...(options.headers as Record<string, string>),
       };
+
+      // Injecting internal API code for internal APIs 
+      if (url.includes("/internal/")) {
+        headers["X-Internal-Code"] = env.INTERNAL_API_CODE;
+      }
+
       if (token) {
         headers["Cookie"] = `access_token=${token}`;
       }

@@ -2,6 +2,10 @@ import { NextRequest } from "next/server";
 
 import { env } from "@/lib/env";
 
+// Internal API endpoints
+// which are allowwed to be fetch from client side
+const ALLOWED_INTERNAL = ["internal/frames/feed"];
+
 async function proxyHandler(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
@@ -15,6 +19,15 @@ async function proxyHandler(
   headers.delete("content-length");
   headers.delete("transfer-encoding");
   headers.delete("content-encoding");
+
+
+  // only allowed paths
+  if (path.startsWith("internal/")) {
+    if (!ALLOWED_INTERNAL.includes(path)) {
+      return new Response("Not found", { status: 404 });
+    }
+    headers.set("X-Internal-Code", env.INTERNAL_API_CODE);
+  }
 
   const body =
     request.method !== "GET" && request.method !== "HEAD"
